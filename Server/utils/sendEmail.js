@@ -1,16 +1,16 @@
 import nodemailer from "nodemailer";
-import { generateVerificationOtpEmailTemplate } from "./generateVerificationOtpEmailTemplate.js"; // adjust the path as needed
+import { generateVerificationOtpEmailTemplate } from "./emailTemplates.js";
 
 export async function sendEmail({ to, subject, otpCode }) {
   try {
-    // 1. Create a transporter using SMTP
+
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,         // e.g., "smtp.mailtrap.io", "smtp.gmail.com"
+      host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT),  // usually 587 or 465
-      secure: process.env.SMTP_SECURE === "true", // true for 465, false for 587
+      secure: process.env.SMTP_SECURE === "true",
       auth: {
-        user: process.env.SMTP_USER,       // SMTP username
-        pass: process.env.SMTP_PASS,       // SMTP password
+        user: process.env.SMTP_USER,       
+        pass: process.env.SMTP_PASS,      
       },
     });
 

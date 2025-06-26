@@ -1,13 +1,13 @@
-import { generateVerificationOtpEmailTemplet } from "../utils/emailTemplates";
-// import { sendEmail } from "../utils/sendEmail"; // Uncomment if needed
+import { generateVerificationOtpEmailTemplate } from "./emailTemplates.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
 export async function sendVerificationCode(verificationCode, email, res) {
     try {
         const message = generateVerificationOtpEmailTemplate(verificationCode);
         sendEmail({
-            email,
+            to: email,
             subject: "Verification Code (Librery Management System)",
-            message,
+            otpCode: verificationCode, 
         });
         res.status(200).json({
             success: true,
