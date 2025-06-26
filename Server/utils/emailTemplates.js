@@ -5,7 +5,7 @@ export function generateVerificationOtpEmailTemplate(otpCode) {
         <h2 style="color: #333;">Email Verification</h2>
         <p style="font-size: 16px; color: #555;">Thank you for registering! Please use the OTP below to verify your email address:</p>
         <div style="font-size: 24px; font-weight: bold; color: #007bff; margin: 20px 0;">${otpCode}</div>
-        <p style="font-size: 14px; color: #777;">This OTP is valid for only 2 minutes. Do not share it with anyone.</p>
+        // <p style="font-size: 14px; color: #777;">This OTP is valid for only 2 minutes. Do not share it with anyone.</p>
         <p style="font-size: 14px; color: #aaa;">If you did not request this, please ignore this email.</p>
       </div>
     </div>`;
