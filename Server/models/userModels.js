@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema(
   {
@@ -26,18 +27,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    verificationCode: {
-      type: Number,
-    },
-    verificationExpire: {
-      type: Date,
-    },
-    resetPasswordToken: {
-      type: String,
-    },
-    resetPasswordExpire: {
-      type: Date,
-    },
+    verificationCode: Number,
+    verificationExpire: Date,
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
     borrowdBooks: [
       {
         bookId: {
@@ -48,45 +41,38 @@ const userSchema = new mongoose.Schema(
           type: Boolean,
           default: false,
         },
-        bookTitle: {
-          type: String,
-        },
-        borrowedDate: {
-          type: Date,
-        },
-        dueDate: {
-          type: Date,
-        },
+        bookTitle: String,
+        borrowedDate: Date,
+        dueDate: Date,
       },
     ],
     avatar: {
-      public_id: {
-        type: String,
-      },
-      url: {
-        type: String,
-      },
+      public_id: String,
+      url: String,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
+// ✅ OTP Generator Method
 userSchema.methods.generateVerificationCode = function () {
-  function generateRandomFiveDigitNumber() {
-    const firstDigit = Math.floor(Math.random() * 9) + 1;
-    const remainingDigits = Math.floor(Math.random() * 10000)
-      .toString()
-      .padStart(4, "0");
-    return parseInt(firstDigit + remainingDigits);
-  }
-
-  const verificationCode = generateRandomFiveDigitNumber();
+  const firstDigit = Math.floor(Math.random() * 9) + 1;
+  const remainingDigits = Math.floor(Math.random() * 10000)
+    .toString()
+    .padStart(4, "0");
+  const verificationCode = parseInt(firstDigit + remainingDigits);
   this.verificationCode = verificationCode;
-  this.verificationExpire = new Date(Date.now() + 2 * 60 * 1000);
-
+  this.verificationExpire = new Date(Date.now() + 2 * 60 * 1000); // 2 mins
   return verificationCode;
+};
+
+// ✅ JWT Token Generator Method
+userSchema.methods.generateToken = function () {
+  return jwt.sign(
+    { id: this._id },
+    process.env.JWT_SECRET_KEY,
+    { expiresIn: process.env.JWT_EXPIRE }
+  );
 };
 
 export const User = mongoose.model("User", userSchema);
