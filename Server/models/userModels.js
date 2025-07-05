@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
+import crypto from "crypto"; 
 
 const userSchema = new mongoose.Schema(
   {
@@ -54,19 +55,23 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ OTP Generator Method
+// OTP Generator Method
 userSchema.methods.generateVerificationCode = function () {
-  const firstDigit = Math.floor(Math.random() * 9) + 1;
+  const firstDigit = Math.floor(Math.random() * 9) + 1; // ensures first digit is not 0
   const remainingDigits = Math.floor(Math.random() * 10000)
     .toString()
     .padStart(4, "0");
-  const verificationCode = parseInt(firstDigit + remainingDigits);
+  
+  const verificationCode = parseInt(`${firstDigit}${remainingDigits}`, 10); // always 5-digit number
+
   this.verificationCode = verificationCode;
-  this.verificationExpire = new Date(Date.now() + 2 * 60 * 1000); // 2 mins
+  this.verificationExpire = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
+
   return verificationCode;
 };
 
-// ✅ JWT Token Generator Method
+
+// JWT Token Generator Method
 userSchema.methods.generateToken = function () {
   return jwt.sign(
     { id: this._id },
@@ -75,4 +80,16 @@ userSchema.methods.generateToken = function () {
   );
 };
 
+userSchema.methods.getResetPasswordToken = function () {
+  const resetToken = crypto.randomBytes(20).toString("hex");
+
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
+  return resetToken;
+};
 export const User = mongoose.model("User", userSchema);

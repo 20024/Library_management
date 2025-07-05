@@ -10,3 +10,20 @@ export function generateVerificationOtpEmailTemplate(otpCode) {
       </div>
     </div>`;
 }
+
+export const generateForgetPasswordEmailTemplate = (resetUrl) => {
+  return `
+    <h2>Password Reset Request</h2>
+    <p>Hi there,</p>
+    <p>We received a request to reset your password. Click the button below to proceed:</p>
+    <a href="${resetUrl}" style="
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;">Reset Password</a>
+    <p>If you didn't request this, please ignore this email.</p>
+    <p>This link will expire in 15 minutes.</p>
+  `;
+};

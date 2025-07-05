@@ -5,6 +5,9 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationCode } from "../utils/sendVerificationCode.js";
 import { sendToken } from "../utils/sendToken.js"
+import { generateForgetPasswordEmailTemplate } from "../utils/emailTemplates.js";
+import { sendEmail } from "../utils/sendEmail.js";
+
 
 export const register = catchAsyncErrors(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -80,9 +83,16 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
       user = userAllEntries[0];
     }
 
+    console.log("Entered OTP:", otp);
+    console.log("Stored OTP:", user.verificationCode);
     if (user.verificationCode !== Number(otp)) {
-      return next(new ErrorHandler("Invalid OTP.", 400));
+      return next(new ErrorHandler("Invalid or already used OTP.", 400));
     }
+
+    console.log("Entered OTP:", otp);
+    console.log("Stored OTP:", user.verificationCode);
+    console.log("Expiry:", user.verificationExpire, "Current time:", Date.now());
+
 
     const currentTime = Date.now();
     const verificationCodeExpire = new Date(user.verificationExpire).getTime();
@@ -104,4 +114,96 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Internal server error.", 500));
   }
 });
+export const login = catchAsyncErrors(async (req, res, next) => {
+  //const { email, password } = req.body;
+  const email = req.body?.email;
+  const password = req.body?.password;
+
+  if (!email || !password) {
+    return next(new ErrorHandler("Please enter all fields.", 400));
+  }
+
+  const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+  if (!user) {
+    return next(new ErrorHandler("User not found (even unverified).", 404));
+  }
+
+  if (!user.accountVerifiedfield) {
+    return next(new ErrorHandler("Account not verified by OTP.", 403));
+  }
+
+  const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordMatch) {
+    return next(new ErrorHandler("Password incorrect", 401));
+  }
+
+  sendToken(user, 200, "Login successful", res);
+});
+
+
+export const logout = catchAsyncErrors(async (req, res, next) => {
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
+});
+
+export const getUser = catchAsyncErrors(async (req, res, next) => {
+  const user = req.user;
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new ErrorHandler("User not found with this email", 404));
+  }
+
+  const resetToken = user.getResetPasswordToken();
+  await user.save({ validateBeforeSave: false });
+
+  const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/password/reset/${resetToken}`;
+
+const message = generateForgetPasswordEmailTemplate(resetUrl);
+
+  console.log("WORKING TILL HERE");
+  console.log(user.email);
+  console.log(message);
+
+  try {
+      await sendEmail({
+  to: user.email,
+  subject: "Password Reset Request",
+  html: generateForgetPasswordEmailTemplate(resetUrl),
+});
+
+    res.status(200).json({
+      success: true,
+      message: `Email sent to ${user.email}`,
+    });
+  }  catch (err) {
+  console.error("SEND EMAIL ERROR:", err);
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  return next(new ErrorHandler("Email could not be sent", 500));
+}
+
+});
+
+
+
 
