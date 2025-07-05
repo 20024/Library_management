@@ -204,6 +204,40 @@ const message = generateForgetPasswordEmailTemplate(resetUrl);
 
 });
 
+export const resetPassword = catchAsyncErrors(async (req, res, next) => {
+  const resetToken = req.params.token;
 
+  const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new ErrorHandler("Invalid or expired reset token", 400));
+  }
+
+  const { newPassword, confirmPassword } = req.body;
+
+  if (!newPassword || !confirmPassword) {
+    return next(new ErrorHandler("Please provide all required fields", 400));
+  }
+
+  if (newPassword !== confirmPassword) {
+    return next(new ErrorHandler("Passwords do not match", 400));
+  }
+
+  user.password = newPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Password reset successful. You can now log in.",
+  });
+});
 
 
