@@ -18,3 +18,16 @@ export const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Invalid or expired token", 401));
   }
 });
+
+
+export const isAuthorized = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorHandler(`User with this role ${req.user.role} is not allowed to access this resource.`, 400)
+      );
+    }
+    next();
+  };
+};
+
