@@ -7,6 +7,7 @@ import { connectDB } from "./database/db.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import authRouter from "./routes/authRouter.js"; 
 import bookRouter from "./routes/bookRouter.js"; 
+import borrowRoutes from "./routes/borrowRoutes.js";
 
 config({ path: "./config/config.env" });
 
@@ -32,6 +33,7 @@ app.use(cookieParser());
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/book", bookRouter);
+app.use("/api/v1/borrow", borrowRoutes);
 
 connectDB();
 app.use(errorMiddleware);

@@ -31,3 +31,18 @@ export const isAuthorized = (...roles) => {
   };
 };
 
+// export const isBorrowAuthorized = (...roles) => {
+//   return (req, res, next) => {
+//     if (!req.user || !req.user.role) {
+//       return next(new ErrorHandler("User not authenticated or role missing", 401));
+//     }
+
+//     if (!roles.includes(req.user.role)) {
+//       return next(
+//         new ErrorHandler(`User with this role ${req.user.role} is not allowed to access this resource.`, 403)
+//       );
+//     }
+
+//     next();
+//   };
+// };
