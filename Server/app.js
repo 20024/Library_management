@@ -8,6 +8,7 @@ import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import authRouter from "./routes/authRouter.js"; 
 import bookRouter from "./routes/bookRouter.js"; 
 import borrowRoutes from "./routes/borrowRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 config({ path: "./config/config.env" });
 
@@ -22,10 +23,10 @@ app.use(cors({
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-//app.use(fileUpload({
-  //useTempFiles: true,
- // tempFileDir: "/tmp/"
-// }));
+app.use(fileUpload({
+  useTempFiles: true,
+ tempFileDir: "/tmp/"
+}));
 
 // app.get("/", (req, res) => {
 //   res.send("Library Management Backend is running");
@@ -34,7 +35,7 @@ app.use(cookieParser());
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/book", bookRouter);
 app.use("/api/v1/borrow", borrowRoutes);
-
+app.use("/api/v1/user", userRoutes);
 connectDB();
 app.use(errorMiddleware);
 
