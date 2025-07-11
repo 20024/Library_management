@@ -1,14 +1,15 @@
 import Borrow from "../models/borrowModels.js";
 import { Book } from "../models/bookModels.js";
-import { User } from "../models/userModels.js"; // ✅ Your valid named export
+import { User } from "../models/userModels.js"; 
 import { catchAsyncErrors } from "../middleware/catchAsyncErrors.js";
 import ErrorHandler from "../middleware/errorMiddleware.js";
+import { calculateFine } from "../utils/calculateFine.js";
 
 export const recordBorroedBook = catchAsyncErrors(async (req, res, next) => {
   const { email, bookId } = req.body;
 
-  console.log("📨 Incoming Email:", email);
-  console.log("📘 Incoming Book ID:", bookId);
+  console.log("Incoming Email:", email);
+  console.log(" Incoming Book ID:", bookId);
 
   const book = await Book.findById(bookId);
   if (!book) {
@@ -69,5 +70,45 @@ export const recordBorroedBook = catchAsyncErrors(async (req, res, next) => {
     success: true,
     message: "Borrowed book recorded successfully",
     borrow,
+  });
+});
+
+export const returnBorrowedBook = catchAsyncErrors(async (req, res, next) => {
+  const { borrowId } = req.params;
+
+  const borrow = await Borrow.findById(borrowId);
+  if (!borrow) {
+    return next(new ErrorHandler("Borrow record not found", 404));
+  }
+
+  if (borrow.status === "Returned") {
+    return next(new ErrorHandler("Book has already been returned", 400));
+  }
+
+  const currentDate = new Date();
+  borrow.returnDate = currentDate;
+  borrow.status = "Returned";
+
+  // Calculate fine using utility function
+  borrow.fine = calculateFine(borrow.dueDate, currentDate);
+
+  await borrow.save();
+  console.log("🔎 Borrow ID from URL:", borrowId);
+
+  // Update book availability
+  const book = await Book.findById(borrow.book);
+  if (book) {
+    book.isAvailable = true;
+    await book.save();
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Book returned successfully",
+    data: {
+      returnDate: borrow.returnDate,
+      fine: borrow.fine,
+      status: borrow.status,
+    },
   });
 });
