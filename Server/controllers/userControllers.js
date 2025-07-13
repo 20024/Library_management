@@ -5,12 +5,16 @@ import { v2 as cloudinary } from "cloudinary";
 import bcrypt from "bcryptjs";
 
 export const getAllUsers = catchAsyncErrors(async (req, res, next) => {
-    const users = await User.find({ accountVerified: true });
+    const users = await User.find(); // You can filter later with { accountVerified: true }
+
+    console.log("All Users in DB:", users);
+
     res.status(200).json({
         success: true,
         users, 
     });
 });
+
 
 export const registerNewAdmin = catchAsyncErrors(async (req, res, next) => {
     if (!req.files || Object.keys(req.files).length === 0) {

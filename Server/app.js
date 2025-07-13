@@ -9,6 +9,8 @@ import authRouter from "./routes/authRouter.js";
 import bookRouter from "./routes/bookRouter.js"; 
 import borrowRoutes from "./routes/borrowRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import { notifyUsers } from "./services/notifyUsers.js";
+
 
 config({ path: "./config/config.env" });
 
@@ -37,6 +39,7 @@ app.use("/api/v1/book", bookRouter);
 app.use("/api/v1/borrow", borrowRoutes);
 app.use("/api/v1/user", userRoutes);
 connectDB();
+notifyUsers();
 app.use(errorMiddleware);
 
 export default app;
