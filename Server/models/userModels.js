@@ -56,23 +56,21 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// OTP Generator Method
 userSchema.methods.generateVerificationCode = function () {
-  const firstDigit = Math.floor(Math.random() * 9) + 1; // ensures first digit is not 0
+  const firstDigit = Math.floor(Math.random() * 9) + 1;
   const remainingDigits = Math.floor(Math.random() * 10000)
     .toString()
     .padStart(4, "0");
   
-  const verificationCode = parseInt(`${firstDigit}${remainingDigits}`, 10); // always 5-digit number
+  const verificationCode = parseInt(`${firstDigit}${remainingDigits}`, 10); 
 
   this.verificationCode = verificationCode;
-  this.verificationExpire = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
+  this.verificationExpire = new Date(Date.now() + 2 * 60 * 1000);
 
   return verificationCode;
 };
 
 
-// JWT Token Generator Method
 userSchema.methods.generateToken = function () {
   return jwt.sign(
     { id: this._id },

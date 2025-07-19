@@ -36,84 +36,59 @@ export const register = catchAsyncErrors(async (req, res, next) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-
   const newUser = await User.create({
     name,
     email: email.toLowerCase(),
     password: hashedPassword,
+    accountVerifiedfield: false,
   });
 
-  const verificationCode = newUser.generateVerificationCode();
+ const verificationCode = newUser.generateVerificationCode();
+
   await newUser.save();
 
   sendVerificationCode(verificationCode, email, res);
-
 });
 
 export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
   const { email, otp } = req.body;
 
-  if (!email || !otp) {
-    return res.status(400).json({
-      success: false,
-      message: "Email or OTP is missing.",
-    });
+  const user = await User.findOne({
+    email,
+    accountVerifiedfield: false,
+  });
+
+  if (!user) {
+    return next(new ErrorHandler("User not found or already verified", 404));
   }
 
-  try {
-    const userAllEntries = await User.find({
-      email,
-      accountVerifiedfield: false,
-    });
-    if (!userAllEntries || userAllEntries.length === 0) {
-      return next(new ErrorHandler("User not found.", 404));
-    }
+  console.log("Entered OTP:", otp);
+  console.log("Stored OTP from DB:", user.verificationCode);
+  console.log("OTP Expiry:", user.verificationExpire);
 
-    let user;
-
-    if (userAllEntries.length > 1) {
-      user = userAllEntries[0];
-
-      await User.deleteMany({
-        _id: { $ne: user._id },
-        email,
-        accountVerifiedfield: false,
-      });
-    } else {
-      user = userAllEntries[0];
-    }
-
-    console.log("Entered OTP:", otp);
-    console.log("Stored OTP:", user.verificationCode);
-    if (user.verificationCode !== Number(otp)) {
-      return next(new ErrorHandler("Invalid or already used OTP.", 400));
-    }
-
-    console.log("Entered OTP:", otp);
-    console.log("Stored OTP:", user.verificationCode);
-    console.log("Expiry:", user.verificationExpire, "Current time:", Date.now());
-
-
-    const currentTime = Date.now();
-    const verificationCodeExpire = new Date(user.verificationExpire).getTime();
-
-    if (currentTime > verificationCodeExpire) {
-      return next(new ErrorHandler("OTP expired.", 400));
-    }
-
-    // Mark the user as verified
-    user.accountVerifiedfield = true;
-    user.verificationCode = undefined;
-    user.verificationExpire = undefined;
-    await user.save({ validateModifiedOnly: true });
-
-    // ✅ Send final response only ONCE
-    sendToken(user, 200, "OTP verified successfully. Account activated.", res);
-
-  } catch (error) {
-    return next(new ErrorHandler("Internal server error.", 500));
+  if (
+    !user.verificationCode ||
+    user.verificationCode !== Number(otp) ||
+    user.verificationExpire < new Date()
+  ) {
+    return next(new ErrorHandler("Invalid or expired OTP", 400));
   }
+
+  user.accountVerifiedfield = true;
+  user.verificationCode = undefined;
+  user.verificationExpire = undefined;
+
+  await user.save();
+
+  const token = user.generateToken();
+
+  res.status(200).json({
+    success: true,
+    message: "Account verified successfully",
+    token,
+  });
 });
+
 export const login = catchAsyncErrors(async (req, res, next) => {
   //const { email, password } = req.body;
   const email = req.body?.email;
