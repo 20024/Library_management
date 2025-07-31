@@ -10,9 +10,19 @@ import Borrow from "./pages/Borrow";
 import Logout from "./pages/Logout";
 import Register from "./pages/Register";
 import VerifyOTP from "./component/VerifyOTP";
+import UpdatePassword from "./pages/UpdatePassword";
+import ForgetPassword from "./pages/ForgetPassword";
+import ResetPassword from "./pages/ResetPassword";
+import BorrowBooks from "./pages/BorrowBooks";
+import AdminLayout from "./pages/Admin/AdminLayout";
+import ManageBooks from "./pages/Admin/ManageBooks";
+import AdminBooks from "./pages/Admin/AdminBooks";
+import ProtectedRoute from "./pages/Admin/ProtectedRoute";
+import AdminBorrowRecords from "./pages/Admin/AdminBorrowRecords";
+import AdminUsers from "./pages/Admin/AdminUsers";
 
 function App() {
-  const isAuthenticated = true; // Replace with your auth logic
+  const isAuthenticated = true;
 
   return (
     <Router>
@@ -72,9 +82,50 @@ function App() {
           }
         />
 
+        <Route
+          path="/update-password"
+          element={
+            isAuthenticated ? (
+              <Layout>
+                <UpdatePassword />
+              </Layout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/books"
+          element={
+            isAuthenticated ? (
+              <Layout>
+                <Books />
+              </Layout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+
+
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/logout" element={<Logout />} />
+        <Route path="/forgot-password" element={<ForgetPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/borrow-book" element={<BorrowBooks />} />
+        <Route path="/admin" element={<AdminLayout />} />
+        <Route path="/admin/books" element={<ManageBooks />} />
+        <Route path="/admin/borrow-record" element={<AdminBorrowRecords />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route
+          path="/admin/books"
+          element={
+            <ProtectedRoute allowedRoles={["Admin"]}>
+              <AdminBooks />
+            </ProtectedRoute>
+          }
+        />
 
       </Routes>
     </Router>

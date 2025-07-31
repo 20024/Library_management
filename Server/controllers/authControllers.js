@@ -53,14 +53,15 @@ export const register = catchAsyncErrors(async (req, res, next) => {
 export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
   const { email, otp } = req.body;
 
-  const user = await User.findOne({
-    email,
-    accountVerifiedfield: false,
-  });
+  const user = await User.findOne({ email });
 
   if (!user) {
-    return next(new ErrorHandler("User not found or already verified", 404));
-  }
+  return res.status(404).json({ message: "User not found" });
+ }
+
+  if (user.isVerified) {
+  return res.status(400).json({ message: "User already verified" });
+ }
 
   console.log("Entered OTP:", otp);
   console.log("Stored OTP from DB:", user.verificationCode);

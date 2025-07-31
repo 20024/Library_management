@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "../api/axios";
-import { Link } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,11 +18,8 @@ const Login = () => {
       const res = await axios.post("/auth/login", { email, password });
 
       if (res.data.success) {
-        // Save token and user info to localStorage
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
-
-        // Redirect to dashboard or wherever
         navigate("/dashboard");
       } else {
         setError("Login failed");
@@ -74,15 +70,21 @@ const Login = () => {
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="Your password"
             />
+            <div className="flex justify-end mt-1 text-sm">
+              <Link to="/forgot-password" className="text-blue-600 hover:underline">
+                Forgot Password?
+              </Link>
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 transition-colors"
+            className="w-full py-3 bg-indigo-600 cursor-pointer text-white rounded-md font-semibold hover:bg-indigo-700 transition-colors"
           >
             Log In
           </button>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2 justify-center mt-4 text-sm">
             <span>New user?</span>
             <Link to="/register" className="text-blue-600 underline">
               Register here

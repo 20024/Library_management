@@ -1,30 +1,28 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 const Sidebar = () => {
-  const links = [
-    { to: "/dashboard", label: "🏠 Dashboard" },
-    { to: "/books", label: "📚 Books" },
-    { to: "/users", label: "👥 Users" },
-    { to: "/borrowed", label: "🔁 Borrowed" },
-    { to: "/logout", label: "🚪 Logout" },
+  const menuItems = [
+    { path: "/dashboard", label: "Dashboard" },
+    { path: "/books", label: "Books" },
+    { path: "/borrow-book", label: "My Borrow" },
   ];
 
   return (
-    <div className="w-64 min-h-screen bg-pink-900 text-white p-4">
-      <h1 className="text-2xl font-bold mb-6 text-center"> Admin Pannel</h1>
-      <nav className="flex flex-col gap-4">
-        {links.map((link) => (
+    <div className="bg-white shadow h-screen p-4 w-52">
+      <Link to={"/dashboard"}><h2 className="text-xl font-bold mb-6"> Book Storm</h2></Link>
+      <nav className="flex flex-col space-y-3">
+        {menuItems.map((item) => (
           <NavLink
-            key={link.to}
-            to={link.to}
+            key={item.path}
+            to={item.path}
             className={({ isActive }) =>
-              `px-4 py-2 rounded hover:bg-blue-700 ${
-                isActive ? "bg-black font-semibold" : ""
+              `p-2 rounded hover:bg-blue-300 ${
+                isActive ? "bg-blue-500 text-white" : "text-gray-700"
               }`
             }
           >
-            {link.label}
+            {item.label}
           </NavLink>
         ))}
       </nav>

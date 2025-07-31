@@ -1,11 +1,11 @@
 .container {
-  background-image: url("../public/images/bd.jpg");
+  background-image: url("bd.jpg");
   background-size: cover;
   background-repeat: no-repeat;
 }
 
 .login_container {
-  background-image: url("../public/images/login.jpg");
+  background-image: url("../images/login.jpg");
   background-size: cover;
   background-repeat: no-repeat;
 }

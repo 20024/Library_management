@@ -6,38 +6,47 @@ const VerifyOTP = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
+    setLoading(true);
 
     if (!email || !otp) {
       setError("Please enter both email and OTP");
+      setLoading(false);
       return;
     }
 
     try {
-      await axios.post("auth/verify-otp", { email: email.trim(), otp: otp.trim() });
-      setSuccess(response.data.message || "OTP verified successfully!");
+      const response = await axios.post("auth/verify-otp", {
+        email: email.trim(),
+        otp: otp.trim(),
+      });
+
+      setShowSuccessModal(true);
+
       setTimeout(() => {
-        navigate("/login");
+        setShowSuccessModal(false);
+        navigate("/dashboard");
       }, 2000);
     } catch (err) {
       setError(
         err.response?.data?.message || "Verification failed. Please try again."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 mt-10 border rounded shadow">
+    <div className="relative max-w-md mx-auto p-4 mt-10 border rounded shadow">
       <h2 className="text-2xl mb-4 font-semibold">Verify Your OTP</h2>
 
       {error && <p className="text-red-600 mb-3">{error}</p>}
-      {success && <p className="text-green-600 mb-3">{success}</p>}
 
       <form onSubmit={handleSubmit}>
         <input
@@ -60,11 +69,26 @@ const VerifyOTP = () => {
 
         <button
           type="submit"
-          className="bg-blue-600 text-white p-2 rounded w-full"
+          disabled={loading}
+          className={`p-2 rounded w-full ${
+            loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 text-white"
+          }`}
         >
-          Verify OTP
+          {loading ? "Verifying..." : "Verify OTP"}
         </button>
       </form>
+
+      {/* ✅ Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-xl text-center w-80">
+            <h2 className="text-xl font-semibold text-green-600 mb-2">
+              🎉 Account Verified!
+            </h2>
+            <p className="text-gray-700">Redirecting to your dashboard...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
