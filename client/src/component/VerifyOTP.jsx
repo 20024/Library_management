@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +9,12 @@ const VerifyOTP = () => {
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const emailFromURL = params.get("email");
+    if (emailFromURL) setEmail(emailFromURL);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -70,22 +76,19 @@ const VerifyOTP = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`p-2 rounded w-full ${
-            loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 text-white"
-          }`}
+          className={`p-2 rounded w-full ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 text-white"}`}
         >
           {loading ? "Verifying..." : "Verify OTP"}
         </button>
       </form>
 
-      {/* ✅ Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-xl text-center w-80">
             <h2 className="text-xl font-semibold text-green-600 mb-2">
-              🎉 Account Verified!
+               Account Verified!
             </h2>
-            <p className="text-gray-700">Redirecting to your dashboard...</p>
+            <p className="text-gray-700">Thank you for resgister.</p>
           </div>
         </div>
       )}

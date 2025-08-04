@@ -1,67 +1,69 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "../api/axios";
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from '../api/axios';  // your axios instance
 
 const ResetPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
 
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   const handleReset = async (e) => {
     e.preventDefault();
-    setMessage("");
-    setError("");
+    setMessage('');
+    setError('');
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
       return;
     }
 
     try {
-      const res = await axios.post(`/password/reset/${token}`, { password });
-      setMessage(res.data.message);
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+      const response = await axios.put(`/auth/password/reset/${token}`, {
+        newPassword,
+        confirmPassword,
+      });
+      setMessage(response.data.message || 'Password reset successful!');
+
+      setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong");
+      setError(err.response?.data?.message || 'Password reset failed');
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-center">Reset Password</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="bg-white p-6 rounded shadow-md max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-6 text-center">Reset Password</h2>
 
-        {message && <div className="text-green-600 mb-4">{message}</div>}
-        {error && <div className="text-red-600 mb-4">{error}</div>}
+        {message && <p className="text-green-600 mb-4 text-center">{message}</p>}
+        {error && <p className="text-red-600 mb-4 text-center">{error}</p>}
 
-        <form onSubmit={handleReset}>
-          <label className="block mb-2 font-medium">New Password</label>
+        <form onSubmit={handleReset} className="space-y-4">
           <input
             type="password"
-            className="w-full p-2 border border-gray-300 rounded mb-4"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            placeholder="New Password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
             required
+            className="w-full p-3 border rounded"
           />
 
-          <label className="block mb-2 font-medium">Confirm Password</label>
           <input
             type="password"
-            className="w-full p-2 border border-gray-300 rounded mb-4"
+            placeholder="Confirm Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            className="w-full p-3 border rounded"
           />
 
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 transition"
+            className="w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
           >
             Reset Password
           </button>

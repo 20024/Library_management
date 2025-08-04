@@ -43,7 +43,7 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     accountVerifiedfield: false,
   });
 
- const verificationCode = newUser.generateVerificationCode();
+  const verificationCode = newUser.generateVerificationCode();
 
   await newUser.save();
 
@@ -56,12 +56,12 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-  return res.status(404).json({ message: "User not found" });
- }
+    return res.status(404).json({ message: "User not found" });
+  }
 
   if (user.isVerified) {
-  return res.status(400).json({ message: "User already verified" });
- }
+    return res.status(400).json({ message: "User already verified" });
+  }
 
   console.log("Entered OTP:", otp);
   console.log("Stored OTP from DB:", user.verificationCode);
@@ -150,33 +150,34 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
   const resetToken = user.getResetPasswordToken();
   await user.save({ validateBeforeSave: false });
 
-  const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/password/reset/${resetToken}`;
+  // const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/auth/password/reset/${resetToken}`;
+     const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
 
-const message = generateForgetPasswordEmailTemplate(resetUrl);
+  const message = generateForgetPasswordEmailTemplate(resetUrl);
 
   console.log("WORKING TILL HERE");
   console.log(user.email);
   console.log(message);
 
   try {
-      await sendEmail({
-  to: user.email,
-  subject: "Password Reset Request",
-  html: generateForgetPasswordEmailTemplate(resetUrl),
-});
+    await sendEmail({
+      to: user.email,
+      subject: "Password Reset Request",
+      html: generateForgetPasswordEmailTemplate(resetUrl),
+    });
 
     res.status(200).json({
       success: true,
       message: `Email sent to ${user.email}`,
     });
-  }  catch (err) {
-  console.error("SEND EMAIL ERROR:", err);
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpire = undefined;
-  await user.save({ validateBeforeSave: false });
+  } catch (err) {
+    console.error("SEND EMAIL ERROR:", err);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save({ validateBeforeSave: false });
 
-  return next(new ErrorHandler("Email could not be sent", 500));
-}
+    return next(new ErrorHandler("Email could not be sent", 500));
+  }
 
 });
 
@@ -208,10 +209,10 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
   user.resetPasswordToken = undefined;
   user.resetPasswordExpire = undefined;
   user.password = await bcrypt.hash(newPassword, 10);
-user.resetPasswordToken = undefined;
-user.resetPasswordExpire = undefined;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
 
-await user.save();
+  await user.save();
 
   await user.save();
 

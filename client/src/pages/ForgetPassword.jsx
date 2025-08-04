@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "../api/axios"; // Adjust path based on your project
+import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
 
 const ForgetPassword = () => {
@@ -14,7 +14,7 @@ const ForgetPassword = () => {
     setError("");
 
     try {
-      const { data } = await axios.post("/password/forgot", { email });
+      const { data } = await axios.post("/auth/password/forgot", { email });
       setMessage(data.message);
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");
