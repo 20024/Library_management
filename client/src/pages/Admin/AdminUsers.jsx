@@ -9,17 +9,19 @@ const AdminUsers = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
 
-   const fetchUsers = async () => {
+  const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("/admin/users", {
+      const res = await axios.post("/borrow/recordallBooks", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data.users);
-      setLoading(false);
     } catch (err) {
       console.error(err);
-      setShowModal(true); // show modal on error (like unauthorized)
+      if (err.response && (err.response.status === 403 || err.response.status === 401)) {
+        setShowModal(true);
+      }
+    } finally {
       setLoading(false);
     }
   };
@@ -36,7 +38,6 @@ const AdminUsers = () => {
   if (showModal) {
     return <Unauthorized onClose={handleClose} />;
   }
-
 
   return (
     <div className="p-6">

@@ -37,7 +37,7 @@ const VerifyOTP = () => {
 
       setTimeout(() => {
         setShowSuccessModal(false);
-        navigate("/dashboard");
+        navigate("/login");
       }, 2000);
     } catch (err) {
       setError(

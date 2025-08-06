@@ -1,162 +1,107 @@
 import React, { useEffect, useState } from "react";
 import axios from "../api/axios";
-import { FaBookOpen, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FiClipboard, FiCheck } from "react-icons/fi"; 
 
-const Books = () => {
+const Book = () => {
   const [books, setBooks] = useState([]);
-  const [borrowedBooks, setBorrowedBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+  const [copiedId, setCopiedId] = useState(null);
 
-  const userEmail = localStorage.getItem("email");
-  const token = localStorage.getItem("token");
-
-  useEffect(() => {
-    const fetchBooksAndBorrowed = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const booksRes = await axios.get("/book/all", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        setBooks(booksRes.data.books || []);
-
-        const borrowsRes = await axios.get("/borrow", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const allBorrows = borrowsRes.data.data || [];
-
-        const userBorrows = allBorrows.filter(
-          (b) =>
-            b.user.email.toLowerCase() === userEmail.toLowerCase() &&
-            b.status !== "Returned"
-        );
-
-        setBorrowedBooks(userBorrows);
-        setLoading(false);
-      } catch (err) {
-        setError("You are not logged in. Please login to view books.");
-        setLoading(false);
-      }
-    };
-
-    fetchBooksAndBorrowed();
-  }, [userEmail, token]);
-
-  const handleBorrow = async (bookId) => {
-    setMessage("");
-    setError("");
-
+  const fetchBooks = async () => {
     try {
-      await axios.post(
-        "/borrow/recordallBooks",
-        {
-          email: userEmail,
-          bookId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setMessage("Book borrowed successfully! Refreshing list...");
-
-      // Refresh list
-      const booksRes = await axios.get("/book/all", {
+      const token = localStorage.getItem("token");
+      const res = await axios.get("/book/all", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setBooks(booksRes.data.books || []);
-
-      const borrowsRes = await axios.get("/borrow", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const allBorrows = borrowsRes.data.data || [];
-      const userBorrows = allBorrows.filter(
-        (b) =>
-          b.user.email.toLowerCase() === userEmail.toLowerCase() &&
-          b.status !== "Returned"
-      );
-      setBorrowedBooks(userBorrows);
+      setBooks(res.data.books);
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to borrow book. Maybe you already borrowed it or it's unavailable."
-      );
+      setError(err.response?.data?.message || "Failed to fetch books.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const isBorrowed = (bookId) =>
-    borrowedBooks.some((borrow) => borrow.book._id === bookId);
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
+  const handleCopy = (id) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1500);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center text-blue-700">Available Books</h1>
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-4xl font-bold text-center text-indigo-800 mb-10">
+        Available Books
+      </h1>
 
-      {loading && <p className="text-center">Loading...</p>}
+      {loading && (
+        <p className="text-center text-gray-500 text-lg">Loading books...</p>
+      )}
       {error && <p className="text-center text-red-500">{error}</p>}
-      {message && <p className="text-center text-green-500">{message}</p>}
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {books.length === 0 && !loading ? (
-          <p className="col-span-full text-center text-gray-600">
-            No books available at the moment.
-          </p>
-        ) : (
-          books.map((book) => (
-            <div key={book._id} className="bg-white p-5 shadow-md rounded-lg">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">{book.title}</h2>
-                <FaBookOpen className="text-blue-600 text-2xl" />
-              </div>
-              <p className="text-gray-600 mb-2">Author: {book.author}</p>
-              <p className="text-gray-600 mb-2">Genre: {book.genre}</p>
+      <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+        {books.map((book) => (
+          <div
+            key={book._id}
+            className="bg-white p-5 rounded-xl shadow-lg border hover:shadow-2xl transition-all duration-300"
+          >
+            <h2 className="text-2xl font-bold text-indigo-700 mb-2 truncate">
+              {book.title}
+            </h2>
+            <p className="text-gray-700 mb-1">
+              <span className="font-medium">Author:</span> {book.author}
+            </p>
+            <p className="text-gray-700 mb-1">
+              <span className="font-medium">Description:</span>{" "}
+              {book.description.length > 100
+                ? book.description.slice(0, 100) + "..."
+                : book.description}
+            </p>
 
-              <div className="flex items-center gap-2 mb-4">
-                {isBorrowed(book._id) ? (
-                  <span className="text-red-600 flex items-center">
-                    <FaTimesCircle className="mr-1" />
-                    Already Borrowed
-                  </span>
-                ) : (
-                  <span className="text-green-600 flex items-center">
-                    <FaCheckCircle className="mr-1" />
-                    Available
-                  </span>
-                )}
-              </div>
-
+            <div className="text-gray-700 mb-1 flex items-center gap-4">
+              <span className="font-medium">Book ID:</span>
+              <span className="text-sm break-all">{book._id}</span>
               <button
-                onClick={() => handleBorrow(book._id)}
-                disabled={isBorrowed(book._id)}
-                className={`w-full py-2 rounded text-white ${
-                  isBorrowed(book._id)
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
+                onClick={() => handleCopy(book._id)}
+                className="text-indigo-600 hover:text-indigo-800 transition"
+                aria-label="Copy Book ID"
               >
-                {isBorrowed(book._id) ? "Borrowed" : "Borrow"}
+                {copiedId === book._id ? (
+                  <FiCheck className="w-3 h-3" title="Copied!" />
+                ) : (
+                  <FiClipboard className="w-4 h-4" />
+                )}
               </button>
             </div>
-          ))
-        )}
+
+            <p className="text-gray-700 mb-1">
+              <span className="font-medium">Price:</span> ₹{book.price}
+            </p>
+            <p className="text-gray-700 mb-1">
+              <span className="font-medium">Quantity:</span> {book.quality}
+            </p>
+            <div className="mt-4">
+              <span
+                className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${
+                  book.availability
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {book.availability ? "Available" : "Unavailable"}
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
-export default Books;
+export default Book;

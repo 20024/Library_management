@@ -112,3 +112,28 @@ export const returnBorrowedBook = catchAsyncErrors(async (req, res, next) => {
     },
   });
 });
+
+export const getUserBorrowRecords = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const borrows = await Borrow.find({ "user.id": userId })
+      .populate({
+        path: "book",
+        select: "title author price", // Add more if you need
+      })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      borrows,
+    });
+  } catch (error) {
+    console.error("Error fetching borrow records:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch borrow records",
+    });
+  }
+});
+

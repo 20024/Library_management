@@ -27,7 +27,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <h2 className="text-2xl font-bold text-gray-800">Welcome, Admin</h2>
 
       {/* Stats Cards */}

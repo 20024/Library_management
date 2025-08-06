@@ -8,7 +8,6 @@ import UserProfile from "../component/UserProfile";
 const Dashboard = () => {
   const [data, setData] = useState({
     books: 0,
-    users: 0,
     activeBorrows: 0,
     overdue: 0,
   });
@@ -39,23 +38,12 @@ const Dashboard = () => {
 
     const fetchStats = async () => {
       try {
-        const [booksRes, usersRes, borrowsRes] = await Promise.all([
-          axios.get("/book"),
-          axios.get("/user"),
-          axios.get("/borrow"),
-        ]);
+        const statsRes = await axios.get("/dashboard/stats");
 
-        const books = booksRes?.data?.books?.length || 0;
-        const users = usersRes?.data?.users?.length || 0;
+        const { books, activeBorrows, overdue } = statsRes?.data || {};
 
-        const borrows = borrowsRes?.data?.data || [];
-        const activeBorrows = borrows.filter(b => b.status !== "Returned").length;
-        const overdue = borrows.filter(b => {
-          const due = new Date(b.dueDate);
-          return !b.returnDate && due < new Date();
-        }).length;
 
-        setData({ books, users, activeBorrows, overdue });
+        setData({ books, activeBorrows, overdue }); 
         setLoading(false);
       } catch (error) {
         console.error("Dashboard fetch error:", error);
@@ -95,7 +83,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <DashboardCard title="Total Books" count={data.books} color="bg-indigo-300" />
-        <DashboardCard title="Active Borrows" count={data.activeBorrows} color="bg-yellow-300" />
+        <DashboardCard title="Borrowed Books" count={data.activeBorrows} color="bg-yellow-300" />
         <DashboardCard title="Overdue Returns" count={data.overdue} color="bg-rose-300" />
       </div>
 

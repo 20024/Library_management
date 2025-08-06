@@ -5,12 +5,12 @@ const Sidebar = () => {
   const menuItems = [
     { path: "/dashboard", label: "Dashboard" },
     { path: "/books", label: "Books" },
-    { path: "/borrow-book", label: "My Borrow" },
+    { path: "/borrow", label: "My Borrow" },
   ];
 
   return (
-    <div className="bg-white shadow h-screen p-4 w-52">
-      <Link to={"/dashboard"}><h2 className="text-xl font-bold mb-6"> Book Storm</h2></Link>
+    <div className="bg-blue-100 shadow h-screen p-4 w-52">
+      <Link to={"/dashboard"}><h2 className="text-2xl font-bold mb-6"> Book Storm</h2></Link>
       <nav className="flex flex-col space-y-3">
         {menuItems.map((item) => (
           <NavLink

@@ -7,7 +7,7 @@ const BorrowRecordsTable = () => {
   const fetchRecords = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("/borrow-record", {
+      const res = await axios.get("/borrow/recordallBooks", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRecords(res.data);

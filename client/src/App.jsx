@@ -7,13 +7,12 @@ import Users from "./pages/Users";
 import Layout from "./component/Layout";
 import WelcomePage from "./pages/WelcomePage";
 import Borrow from "./pages/Borrow";
-import Logout from "./pages/Logout";
+import Logout from "../src/component/Logout";
 import Register from "./pages/Register";
 import VerifyOTP from "./component/VerifyOTP";
 import UpdatePassword from "./pages/UpdatePassword";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
-import BorrowBooks from "./pages/BorrowBooks";
 import AdminLayout from "./pages/Admin/AdminLayout";
 import ManageBooks from "./pages/Admin/ManageBooks";
 import AdminBooks from "./pages/Admin/AdminBooks";
@@ -113,7 +112,6 @@ function App() {
         <Route path="/logout" element={<Logout />} />
         <Route path="/forgot-password" element={<ForgetPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/borrow-book" element={<BorrowBooks />} />
         <Route path="/admin" element={<AdminLayout />} />
         <Route path="/admin/books" element={<ManageBooks />} />
         <Route path="/admin/borrow-record" element={<AdminBorrowRecords />} />
