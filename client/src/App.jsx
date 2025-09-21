@@ -15,7 +15,6 @@ import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminLayout from "./pages/Admin/AdminLayout";
 import ManageBooks from "./pages/Admin/ManageBooks";
-import AdminBooks from "./pages/Admin/AdminBooks";
 import ProtectedRoute from "./pages/Admin/ProtectedRoute";
 import AdminBorrowRecords from "./pages/Admin/AdminBorrowRecords";
 import AdminUsers from "./pages/Admin/AdminUsers";
@@ -116,15 +115,6 @@ function App() {
         <Route path="/admin/books" element={<ManageBooks />} />
         <Route path="/admin/borrow-record" element={<AdminBorrowRecords />} />
         <Route path="/admin/users" element={<AdminUsers />} />
-        <Route
-          path="/admin/books"
-          element={
-            <ProtectedRoute allowedRoles={["Admin"]}>
-              <AdminBooks />
-            </ProtectedRoute>
-          }
-        />
-
       </Routes>
     </Router>
   );

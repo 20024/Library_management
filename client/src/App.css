@@ -1,7 +1,18 @@
-.container {
-  background-image: url("bd.jpg");
+.welcomecontainer {
+  background-image: url("../public/images/book.jpg");
   background-size: cover;
   background-repeat: no-repeat;
+}
+.homepage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(108, 154, 245, 0.6), rgba(240, 240, 240, 0.6));
+  z-index: 1;
+}
+.homepage * {
+  position: relative;
+  z-index: 2;
 }
 
 .login_container {

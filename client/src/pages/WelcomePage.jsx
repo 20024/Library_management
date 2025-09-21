@@ -8,7 +8,7 @@ const WelcomePage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col welcomecontainer homepage">
       {/* Main content */}
       <div className="flex-grow container flex flex-col items-center justify-center px-5 text-black">
         <motion.h1
