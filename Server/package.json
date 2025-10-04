@@ -2,8 +2,10 @@
   "name": "server",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
-  
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
@@ -17,3 +19,4 @@
     "nodemailer": "^7.0.3"
   }
 }
+
