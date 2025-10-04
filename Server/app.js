@@ -18,7 +18,23 @@ config({ path: "./config/config.env" });
 const app = express();
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  // origin: process.env.FRONTEND_URL,
+ const allowedOrigins = [
+  "https://library-management-three-kappa.vercel.app",
+  "https://library-management-7pxr.vercel.app",
+  "http://localhost:5173" // for local dev
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    // allow requests with no origin like Postman
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
